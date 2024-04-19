@@ -1,0 +1,59 @@
+import java.sql.*;
+
+public class UserAuthentication {
+    private Connection connection;
+
+    // Kết nối tới cơ sở dữ liệu MySQL
+    public UserAuthentication() {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/mahoa", "root", "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Đăng ký người dùng
+    public boolean register(String username, String password) {
+        try {
+            String query = "INSERT INTO users (username, password) VALUES (?, ?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+            preparedStatement.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Đăng nhập
+    public boolean login(String username, String password) {
+        try {
+            String query = "SELECT * FROM users WHERE username=? AND password=?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static void main(String[] args) {
+        UserAuthentication userAuth = new UserAuthentication();
+        // Đăng ký
+        userAuth.register("username", "password");
+
+        // Đăng nhập
+        if (userAuth.login("username", "password")) {
+            System.out.println("Đăng nhập thành công. Chào mừng bạn!");
+            // Hiển thị giao diện welcome ở đây
+        } else {
+            System.out.println("Tên đăng nhập hoặc mật khẩu không chính xác.");
+        }
+    }
+}
